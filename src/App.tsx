@@ -5,8 +5,10 @@ import todosFromServer from './api/todos';
 import { TodoList } from './components/TodoList';
 import { useState } from 'react';
 
+const findUserById = (userId: number) => usersFromServer.find(u => u.id === userId);
+
 const todos = todosFromServer.map(todo => {
-  const user = usersFromServer.find(u => u.id === todo.userId);
+  const user = findUserById(todo.userId);
 
   return { ...todo, user };
 });
@@ -16,6 +18,14 @@ export const App = () => {
   const [title, setTitle] = useState('');
   const [chosenUser, setChosenUser] = useState(0);
   const [error, setError] = useState(false);
+
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value);
+  };
+
+  const handleUserChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setChosenUser(+event.target.value);
+  };
 
   const addTodo = () => {
     const getId =
@@ -32,10 +42,10 @@ export const App = () => {
       title: title,
       completed: false,
       userId: chosenUser,
-      user: usersFromServer.find(u => u.id === chosenUser),
+      user: findUserById(chosenUser),
     };
 
-    setVisibleTodos([...visibleTodos, newTodo]);
+    setVisibleTodos(currTodos => [...currTodos, newTodo]);
   };
 
   const reset = () => {
@@ -73,7 +83,7 @@ export const App = () => {
               id="title"
               data-cy="titleInput"
               value={title}
-              onChange={event => setTitle(event.target.value)}
+              onChange={handleTitleChange}
             />
           </label>
 
@@ -89,9 +99,7 @@ export const App = () => {
               value={chosenUser}
               id="user"
               data-cy="userSelect"
-              onChange={event => {
-                setChosenUser(+event.target.value);
-              }}
+              onChange={handleUserChange}
             >
               <option value="0" disabled>
                 Choose a user
